@@ -1,6 +1,6 @@
 # INS3201 – Ransomware & System Recovery
 
-> Đồ án thực hành môn **Điều tra số và phản ứng với sự cố (INS3201)** – **Nhóm 2**
+>  Thực hành môn **Điều tra số và phản ứng với sự cố (INS3201)** – **Nhóm 2**
 > Giảng viên hướng dẫn: **Ths Nguyễn Thái Cường**
 
 Mini Lab mô phỏng chuỗi **phát hiện → điều tra → ứng cứu → khôi phục** một sự cố ransomware trên Linux, chạy hoàn toàn trong môi trường máy ảo **VMware Workstation** cô lập (mạng Host-only, không Internet).
