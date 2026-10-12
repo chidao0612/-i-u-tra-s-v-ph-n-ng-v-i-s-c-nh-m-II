@@ -1,0 +1,62 @@
+{
+  "type": "bundle",
+  "id": "bundle--6bb95b0a-e7eb-42ec-9eef-68573ceadb3f",
+  "objects": [
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--dfa07b96-e967-4077-a443-a4b080d27b9b",
+      "created": "2026-10-12T00:30:57.861Z",
+      "modified": "2026-10-12T00:30:57.861Z",
+      "name": "Nhom 2 - INS3201",
+      "identity_class": "group"
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--90ee5271-6732-4e44-ab9a-3f788d05ba9c",
+      "created": "2026-10-12T00:30:57.861Z",
+      "modified": "2026-10-12T00:30:57.861Z",
+      "created_by_ref": "identity--dfa07b96-e967-4077-a443-a4b080d27b9b",
+      "name": "INS3201 artifact hash: simulate_events.py",
+      "description": "SHA-256 cua simulate_events.py trong lab INS3201 (moi truong co lap).",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "[file:hashes.'SHA-256' = '324fa9ecf7449d08f143de9ec599d06d8b0e1bf12a8de7ee4c637a8fdcaad9e7']",
+      "pattern_type": "stix",
+      "valid_from": "2026-10-12T00:30:57.861Z"
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--dc125fff-e2a7-447b-983f-deea00f561c5",
+      "created": "2026-10-12T00:30:57.861Z",
+      "modified": "2026-10-12T00:30:57.861Z",
+      "created_by_ref": "identity--dfa07b96-e967-4077-a443-a4b080d27b9b",
+      "name": "INS3201 artifact hash: ransomware_detection.yar",
+      "description": "SHA-256 cua ransomware_detection.yar trong lab INS3201 (moi truong co lap).",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "[file:hashes.'SHA-256' = '1c5e8b1e71d001b7f0ad34c75c2b806a328ac9006478c8270b9be1f251aa4f3b']",
+      "pattern_type": "stix",
+      "valid_from": "2026-10-12T00:30:57.861Z"
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--dc2c0843-895f-40ab-bc23-2e1b0a86418d",
+      "created": "2026-10-12T00:30:57.861Z",
+      "modified": "2026-10-12T00:30:57.861Z",
+      "created_by_ref": "identity--dfa07b96-e967-4077-a443-a4b080d27b9b",
+      "name": "INS3201 YARA rules",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "import \"math\"\n\n/*\n  INS3201 - Nhom 2 - Luat YARA (phien ban 2.1, da sua so voi ban 2.0)\n  Quet:  yara -r detection/ransomware_detection.yar /home/ubuntu/\n  Test:  yara detection/ransomware_detection.yar tests/yara_sample.txt\n*/\n\nrule Ransomware_Python_Hybrid_INS3201\n{\n    meta:\n        description = \"Phat hien script ma hoa Python (hybrid AES/RSA) cua mo phong INS3201\"\n        author = \"Nhom 2 - INS3201\"\n        version = \"2.1\"\n\n    strings:\n        $s1 = \"cryptography.hazmat.primitives.ciphers\" ascii\n        $s2 = \"READ_ME_NOW.txt\" ascii\n        $s3 = \".LOCKED\" ascii\n\n    condition:\n        filesize < 5MB and all of ($s*)\n}\n\nrule Ransomware_Encrypted_File_INS3201\n{\n    meta:\n        description = \"File .LOCKED: 2 byte dau = do dai khoa AES ma hoa RSA-2048 (256 = 0x0100), entropy cao\"\n        author = \"Nhom 2 - INS3201\"\n        version = \"2.1\"\n\n    condition:\n        uint16be(0) == 0x0100 and\n        filesize > 274 and filesize < 50MB and     // 2 + 256 (khoa) + 16 (IV) + >=1 block\n        math.entropy(0, filesize) > 7.0            // file nho (~300 byte) chi dat ~7.3 nen khong dung 7.5\n}\n",
+      "pattern_type": "yara",
+      "valid_from": "2026-10-12T00:30:57.861Z"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+## INS3201 - Nhom 2 - auditd rules cho Victim VM (Ubuntu 22.04, x86_64)
+## Cai dat: sudo cp config/audit.rules /etc/audit/rules.d/audit.rules && sudo augenrules --load
+## Kiem tra: sudo auditctl -l
+
+# Xoa rules cu
+-D
+
+# Kich thuoc buffer kernel audit
+-b 8192
+
+# Hanh dong khi tran buffer (1 = syslog, 2 = kernel panic)
+-f 1
+
+# Giam sat thu muc du lieu (ghi / doi thuoc tinh)
+-w /home/ubuntu/data/ -p wa -k ransomware_monitor
+
+# Giam sat syscall doi ten file: rename(82) renameat(264) renameat2(316)
+-a always,exit -F arch=b64 -S rename -S renameat -S renameat2 -k mass_rename
+
+# Giam sat syscall xoa file: unlink(87) unlinkat(263)
+-a always,exit -F arch=b64 -S unlink -S unlinkat -k file_deletion

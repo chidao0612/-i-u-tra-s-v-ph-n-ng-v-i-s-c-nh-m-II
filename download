@@ -1,0 +1,25 @@
+# Khóa & bí mật – TUYỆT ĐỐI không commit
+*.pem
+*.key
+rsa_private_key*
+# Bằng chứng / log sinh ra khi chạy lab
+evidence/
+*.log
+# Dữ liệu thử & file mã hóa
+*.LOCKED
+*.SIMTEST
+*.tmp_recover
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Video nặng (chỉ lưu link trong demo/link_video.md)
+*.mp4
+*.mkv
+# VMware
+*.vmdk
+*.vmem
+*.vmsn
+*.vmss
+*.nvram
+*.lck/

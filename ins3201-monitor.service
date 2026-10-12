@@ -1,0 +1,14 @@
+[Unit]
+Description=INS3201 Ransomware Behaviour Monitor
+Wants=auditd.service
+After=auditd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/ubuntu/monitor.py
+Restart=on-failure
+RestartSec=3
+# Chay duoi root de doc duoc /var/log/audit/audit.log
+
+[Install]
+WantedBy=multi-user.target

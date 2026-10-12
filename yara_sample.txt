@@ -1,0 +1,4 @@
+# Mau kiem thu YARA - KHONG phai ma doc. Chi chua chuoi ky hieu de kich hoat luat Ransomware_Python_Hybrid_INS3201.
+import: cryptography.hazmat.primitives.ciphers
+ransom_note_name = READ_ME_NOW.txt
+extension = .LOCKED

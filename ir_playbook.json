@@ -1,0 +1,147 @@
+{
+  "type": "playbook",
+  "spec_version": "1.0",
+  "id": "playbook--ff4f0c79-45ac-4870-8039-44789a93a058",
+  "name": "INS3201 Ransomware Response and Recovery Playbook",
+  "description": "Playbook ung cuu su co ransomware (lab INS3201, Nhom 2): co lap, diet tien trinh, thu thap bang chung, khoi phuc bang khoa hoac snapshot.",
+  "playbook_types": [
+    "notification",
+    "mitigation",
+    "remediation"
+  ],
+  "created_by": "identity--f09e6ec0-079e-48e7-b24e-3d5934f1bb0b",
+  "created": "2026-10-12T08:00:00.000Z",
+  "modified": "2026-10-12T08:00:00.000Z",
+  "revoked": false,
+  "valid_from": "2026-10-12T08:00:00.000Z",
+  "labels": [
+    "ransomware",
+    "ins3201",
+    "dfir"
+  ],
+  "playbook_variables": {
+    "$$rsa_key_available$$": {
+      "type": "boolean",
+      "description": "true neu con khoa rieng RSA",
+      "value": true,
+      "constant": false
+    }
+  },
+  "workflow_start": "step--967e678c-bac3-4cfd-aedc-2187c414b7d1",
+  "workflow": {
+    "step--967e678c-bac3-4cfd-aedc-2187c414b7d1": {
+      "type": "start",
+      "name": "Start",
+      "on_completion": "step--c4515007-b624-4821-a6f8-1ab1d6c93196"
+    },
+    "step--c4515007-b624-4821-a6f8-1ab1d6c93196": {
+      "type": "single",
+      "name": "Isolate network interface",
+      "description": "Ngat card mang Victim de cat lien lac C2 / ngan lay lan.",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "sudo bash scripts/network_isolate.sh isolate ens33",
+          "description": "Hoac VMware: VM > Settings > Network Adapter > Disconnect"
+        }
+      ],
+      "on_completion": "step--dc0aefbc-39ba-4446-a4b4-e8bc9f43b77c"
+    },
+    "step--dc0aefbc-39ba-4446-a4b4-e8bc9f43b77c": {
+      "type": "single",
+      "name": "Terminate malicious process",
+      "description": "Lay PID tu auditd roi dung tien trinh.",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "sudo ausearch -k mass_rename -i | grep -E 'pid=|comm='"
+        },
+        {
+          "type": "bash",
+          "command": "sudo kill -9 <PID>",
+          "description": "Thay <PID> bang gia tri tu log hoac tu canh bao cua monitor.py"
+        }
+      ],
+      "on_completion": "step--55dc6497-acd2-45f4-b9f6-282c0644399a"
+    },
+    "step--55dc6497-acd2-45f4-b9f6-282c0644399a": {
+      "type": "single",
+      "name": "Collect evidence",
+      "description": "Bao toan bang chung truoc khi khoi phuc (ausearch, yara, hash).",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "sudo bash scripts/collect_evidence.sh"
+        }
+      ],
+      "on_completion": "step--d9e226cb-2325-4ab1-99c8-6c726c00d2d4"
+    },
+    "step--d9e226cb-2325-4ab1-99c8-6c726c00d2d4": {
+      "type": "if-condition",
+      "name": "Co khoa rieng RSA hop le?",
+      "condition": "$$rsa_key_available$$ == true",
+      "on_true": "step--285b150f-cb25-4c22-ac37-d002b9128cf8",
+      "on_false": "step--56d1953e-981f-420c-b4e1-27096474fe77"
+    },
+    "step--285b150f-cb25-4c22-ac37-d002b9128cf8": {
+      "type": "single",
+      "name": "Restore data with decrypt.py (Kich ban A)",
+      "description": "Giai ma bang khoa rieng RSA; chay --dry-run truoc.",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "python3 scripts/decrypt.py --dry-run"
+        },
+        {
+          "type": "bash",
+          "command": "python3 scripts/decrypt.py"
+        }
+      ],
+      "on_completion": "step--0860ea26-78fb-4d0a-b615-ef106045bdd9"
+    },
+    "step--56d1953e-981f-420c-b4e1-27096474fe77": {
+      "type": "single",
+      "name": "Rollback VMware snapshot (Kich ban B)",
+      "description": "Khong co khoa / he thong hong: khoi phuc snapshot Baseline_Clean_State tren may host.",
+      "commands": [
+        {
+          "type": "manual",
+          "command": "vmrun -T ws revertToSnapshot \"<duong_dan>\\Victim_Ubuntu_Server.vmx\" \"Baseline_Clean_State\"",
+          "description": "Hoac VM > Snapshot > Revert to Snapshot"
+        }
+      ],
+      "on_completion": "step--0860ea26-78fb-4d0a-b615-ef106045bdd9"
+    },
+    "step--0860ea26-78fb-4d0a-b615-ef106045bdd9": {
+      "type": "single",
+      "name": "Re-enable network",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "sudo bash scripts/network_isolate.sh restore ens33"
+        }
+      ],
+      "on_completion": "step--abafe387-a9f9-4064-b396-8965fb25ccb0"
+    },
+    "step--abafe387-a9f9-4064-b396-8965fb25ccb0": {
+      "type": "single",
+      "name": "Verify clean state",
+      "description": "Xac nhan khong con file .LOCKED/.SIMTEST va khong con canh bao moi.",
+      "commands": [
+        {
+          "type": "bash",
+          "command": "find /home/ubuntu/data -name '*.LOCKED' -o -name '*.SIMTEST' | wc -l"
+        },
+        {
+          "type": "bash",
+          "command": "yara -r detection/ransomware_detection.yar /home/ubuntu/"
+        }
+      ],
+      "on_completion": "step--8fd5670b-9b63-45a5-a066-1eae95b453fd"
+    },
+    "step--8fd5670b-9b63-45a5-a066-1eae95b453fd": {
+      "type": "end",
+      "name": "End"
+    }
+  }
+}
